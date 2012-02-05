@@ -15,7 +15,7 @@ class IFormatter(Interface):
     content_type = Attribute('Content Type')
 
     def format(value): 
-        """ accepts a dict, and return the formatted value """
+        """ accepts a dict, and write the formatted value """
 
 
 class IAuthService(Interface):

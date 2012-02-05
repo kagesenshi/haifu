@@ -2,7 +2,6 @@ from tornado.web import Application as BaseApplication
 from tornado.web import RequestHandler, addslash
 from zope.component import getUtilitiesFor, getUtility
 from haifu.interfaces import IService, IFormatter
-from haifu import formathelper
 from zope.interface import implements
 import grokcore.component as grok
 import inspect

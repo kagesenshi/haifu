@@ -1,7 +1,7 @@
 from haifu.exc import HTTPException, Unauthorized
 from zope.component import getUtility, getUtilitiesFor
 from haifu.interfaces import IService, IFormatter, IAuthService
-from haifu import formathelper
+from haifu import ocshelper
 import traceback
 import base64
 
@@ -20,7 +20,7 @@ def error_handler(func):
         except Exception, e:
             if isinstance(e, HTTPException):
                 raise e
-            message = formathelper.meta(False, 999, str(e))
+            message = ocshelper.meta(False, 999, str(e))
             traceback.print_exc()
             return {'ocs': message}
     wrapper.func_name = func.func_name
@@ -46,7 +46,7 @@ def httpexceptionhandler(func):
             for k, v in e.headers:
                 self.set_header(k, v)
             message = '%s: %s' % (e.code, e.message)
-            result = formathelper.meta(False, 999, message)
+            result = ocshelper.meta(False, 999, message)
             self._transforms = []
             return {'ocs': result}
         return result
