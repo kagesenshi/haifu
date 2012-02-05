@@ -38,8 +38,6 @@ def formattransformer(func):
     return wrapper
 
 def httpexceptionhandler(func):
-    # based on
-    # http://kelleyk.com/post/7362319243/easy-basic-http-authentication-with-tornado
     def wrapper(self, *args, **kwargs):
         try:
             result = func(self, *args, **kwargs)
@@ -50,26 +48,18 @@ def httpexceptionhandler(func):
             message = '%s: %s' % (e.code, e.message)
             result = formathelper.meta(False, 999, message)
             self._transforms = []
-            return result
+            return {'ocs': result}
         return result
     wrapper.func_name = func.func_name
     return wrapper
 
 def require_auth(func):
     def wrapper(self, *args, **kwargs):
-        auth_header = self.request.headers.get('Authorization')
-        if auth_header is None or not auth_header.startswith('Basic '):
-            raise Unauthorized
-        auth_decoded = base64.decodestring(auth_header[6:])
-        cred = auth_decoded.split(':', 2)
-        username = cred[0]
-        password = None
-        if len(cred) == 2:
-            password = cred[1]
-
+        # inspired from Plone's Pluggable Auth Service
         valid = False
         for name, util in getUtilitiesFor(IAuthService):
-            if util.authenticate(username, password):
+            credentials = util.extract_credentials(self.request)            
+            if util.authenticate(**credentials):
                 valid = True
                 break
         if not valid:
