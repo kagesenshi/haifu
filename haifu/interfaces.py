@@ -1,4 +1,4 @@
-from zope.interface import Interface
+from zope.interface import Interface, Attribute
 
 class IService(Interface):
     """ marker interface for a service """

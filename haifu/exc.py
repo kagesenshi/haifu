@@ -11,3 +11,7 @@ class Unauthorized(HTTPException):
 class Forbidden(HTTPException):
     code = 403
     message = 'Forbidden'
+
+class InternalError(HTTPException):
+    code = 501
+    message = ''

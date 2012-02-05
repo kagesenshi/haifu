@@ -1,4 +1,4 @@
-from haifu.exc import HTTPException, Unauthorized
+from haifu.exc import HTTPException, Unauthorized, InternalError
 from zope.component import getUtility, getUtilitiesFor
 from haifu.interfaces import IService, IFormatter, IAuthService
 from haifu import ocshelper
@@ -20,9 +20,10 @@ def error_handler(func):
         except Exception, e:
             if isinstance(e, HTTPException):
                 raise e
-            message = ocshelper.meta(False, 999, str(e))
+            error = InternalError()
+            error.message = str(e)
             traceback.print_exc()
-            return {'ocs': message}
+            raise error
     wrapper.func_name = func.func_name
     return wrapper
 
