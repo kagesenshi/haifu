@@ -7,7 +7,6 @@ import grokcore.component as grok
 import inspect
 import simplejson
 import traceback
-from haifu.basicauth import require_basic_auth
 from haifu.exc import HTTPException
 from haifu.decorator import (error_handler, formattransformer,
                                 httpexceptionhandler)
