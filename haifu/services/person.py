@@ -1,9 +1,10 @@
-from haifu.interfaces import IService
+from haifu.interfaces import IService, IAuthService
 from zope.interface import classProvides
 import grokcore.component as grok
 import zope.component as zca
 from haifu.api import Service, method
 from haifu import formathelper
+import base64
 
 class PersonService(Service):
     grok.name('v1/person')
@@ -16,3 +17,35 @@ class PersonService(Service):
 
         if login is None:
             return {'ocs': formathelper.meta(False, 102, 'Missing login')}
+
+
+class SimpleBasicAuthService(grok.GlobalUtility):
+    grok.implements(IAuthService)
+    # based on
+    # http://kelleyk.com/post/7362319243/easy-basic-http-authentication-with-tornado
+
+    def extract_credentials(self, request):
+
+        auth_header = request.headers.get('Authorization')
+        if auth_header is None or not auth_header.startswith('Basic '):
+            return {'login': None, 'password': None}
+
+        auth_decoded = base64.decodestring(auth_header[6:])
+        cred = auth_decoded.split(':', 2)
+        login = cred[0]
+        password = None
+        if len(cred) == 2:
+            password = cred[1]
+
+        return {
+            'login': login,
+            'password': password
+        }
+
+    def authenticate(self, login, password, **creds):
+        if login == 'izhar' and password=='password':
+            return True
+        return False
+
+    def principal(self, login, **creds):
+        return login
