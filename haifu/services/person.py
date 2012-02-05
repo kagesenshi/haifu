@@ -18,6 +18,8 @@ class PersonService(Service):
         if login is None:
             return {'ocs': formathelper.meta(False, 102, 'Missing login')}
 
+        auth = zca.getUtility(IAuthService)
+
 
 class SimpleBasicAuthService(grok.GlobalUtility):
     grok.implements(IAuthService)
@@ -42,10 +44,12 @@ class SimpleBasicAuthService(grok.GlobalUtility):
             'password': password
         }
 
-    def authenticate(self, login, password, **creds):
+    def authenticate(self, credentials):
+        login = credentials.get('login', None)
+        password = credentials.get('password', None)
         if login == 'izhar' and password=='password':
             return True
         return False
 
-    def principal(self, login, **creds):
-        return login
+    def principal(self, credentials):
+        return credentials.get('login', None)

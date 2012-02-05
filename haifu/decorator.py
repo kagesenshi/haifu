@@ -56,14 +56,9 @@ def httpexceptionhandler(func):
 
 def require_auth(func):
     def wrapper(self, *args, **kwargs):
-        # inspired from Plone's Pluggable Auth Service
-        valid = False
-        for name, util in getUtilitiesFor(IAuthService):
-            credentials = util.extract_credentials(self.request)            
-            if util.authenticate(**credentials):
-                valid = True
-                break
-        if not valid:
+        auth = getUtility(IAuthService)
+        credentials = auth.extract_credentials(self.request)            
+        if not auth.authenticate(credentials):
             raise Unauthorized
         return func(self, *args, **kwargs)
 

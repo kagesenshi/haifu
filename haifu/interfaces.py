@@ -24,7 +24,7 @@ class IAuthService(Interface):
     def extract_credentials(request):
         """ Extract credentials from request, return a dict """
 
-    def authenticate(**credentials):
+    def authenticate(credentials):
         """ Authenticate the given credentials """
 
     def principal(**credentials):
