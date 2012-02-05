@@ -13,14 +13,22 @@ setup(name='haifu',
       author='Izhar Firdaus',
       author_email='izhar@inigo-tech.com',
       url='',
-      license='GPLv3',
+      license='BSD',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
+        'grokcore.component',
+        'tornado',
+        'TornadIO',
+        'argh',
+        'simplejson',
+        'xmldict'
       ],
-      entry_points="""
-      # -*- Entry points: -*-
-      """,
+      entry_points={
+          'console_scripts': [
+              'haifu-admin = haifu.scripts:main',
+           ]
+      }
       )
