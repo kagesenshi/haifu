@@ -112,6 +112,9 @@ class SimpleBasicAuthService(grok.GlobalUtility):
 
         storage = zca.getUtility(IPersonStorage)
 
+        if login is None:
+            return False
+
         if password is not None:
             person = storage.get_person(login)
         else:

@@ -35,6 +35,12 @@ class ISAEngine(Interface):
     """ Marker interface for engine """
     pass
 
+class IEvent(Interface):
+    pass
+
+class IStartupEvent(IEvent):
+    pass
+
 
 class IStorage(Interface):
     pass

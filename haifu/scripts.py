@@ -2,8 +2,11 @@ import tornado.web
 import tornado.ioloop
 import argh
 from zope.configuration.xmlconfig import xmlconfig
+import zope.component.event # enable event triggering
 from haifu.model import Application
+from haifu.event import StartupEvent
 from StringIO import StringIO
+from zope.event import notify
 
 def hook_zca():
     xmlconfig(StringIO('''
@@ -14,7 +17,8 @@ def hook_zca():
 def start(port=8888):
     hook_zca()
     application = Application()
-#    application = tornado.web.Application([])
+    event = StartupEvent()
+    notify(event)
     print "STARTED!!"
     application.listen(port)
     tornado.ioloop.IOLoop.instance().start()

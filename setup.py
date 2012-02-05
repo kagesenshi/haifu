@@ -24,7 +24,8 @@ setup(name='haifu',
         'TornadIO',
         'argh',
         'simplejson',
-        'xmldict'
+        'xmldict',
+        'sqlalchemy'
       ],
       entry_points={
           'console_scripts': [
