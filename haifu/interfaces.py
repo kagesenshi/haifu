@@ -29,3 +29,33 @@ class IAuthService(Interface):
 
     def principal(**credentials):
         """ Return the principal id (user id) from the credentials """
+
+
+class ISAEngine(Interface):
+    """ Marker interface for engine """
+    pass
+
+
+class IStorage(Interface):
+    pass
+
+class IPersonStorage(IStorage):
+    def add_person(login, password, firstname, lastname, email):
+        """ return object which implements IPerson """
+
+    def get_person(login):
+        """ return object which implements IPerson """
+
+    def get_person_by_email(email):
+        """ return object which implements IPerson """
+
+    def get_person_by_apikey(apikey):
+        """ return object which implements IPerson """
+
+
+class IPerson(Interface):
+
+    principal = Attribute('Principal ID')
+
+    def validate_password(password):
+        """ returns bool """

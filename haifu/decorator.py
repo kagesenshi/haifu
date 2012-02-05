@@ -4,6 +4,7 @@ from haifu.interfaces import IService, IFormatter, IAuthService
 from haifu import ocshelper
 import traceback
 import base64
+from tornado.escape import xhtml_escape
 
 def method(method='get'):
     """ decorator to set the method of the function """
@@ -21,7 +22,10 @@ def error_handler(func):
             if isinstance(e, HTTPException):
                 raise e
             error = InternalError()
-            error.message = str(e)
+            error.message = xhtml_escape('%s : %s' % (
+                e.__class__.__name__,
+                str(e)
+            ))
             traceback.print_exc()
             raise error
     wrapper.func_name = func.func_name
