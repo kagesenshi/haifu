@@ -5,7 +5,7 @@ from zope.configuration.xmlconfig import xmlconfig
 import zope.component.event # enable event triggering
 import grokcore.component as grok
 from haifu.model import Application
-from haifu.event import StartupEvent
+from haifu.event import StartupEvent, InitializeEvent
 from haifu.interfaces import IConfiguration
 from StringIO import StringIO
 from zope.event import notify
@@ -31,6 +31,7 @@ def hook_config(path):
 
 def start(port=8888):
     hook_zca()
+    notify(InitializeEvent())
     application = Application()
     notify(StartupEvent())
     print "STARTED!!"

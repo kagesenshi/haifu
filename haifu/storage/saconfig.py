@@ -1,6 +1,9 @@
 import zope.component as zca
+import grokcore.component as grok
+from haifu.interfaces import IInitializeEvent, IConfiguration
 from zope.interface import Interface
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import create_engine
 
 _named_scoped_session = {}
 
@@ -17,3 +20,11 @@ def named_scoped_session(name=''):
     session = scoped_session(sessionmaker(bind=engine))
     _named_scoped_session[name] = session
     return session
+
+@grok.subscribe(IInitializeEvent)
+def handler(event):
+    config = zca.getUtility(IConfiguration)
+    gsm = zca.getGlobalSiteManager()
+    for name, dburi in config.items('saconfig'):
+        engine = create_engine(dburi)
+        gsm.registerUtility(lambda: engine, IEngineFactory, name=name)

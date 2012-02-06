@@ -41,6 +41,9 @@ class IEvent(Interface):
 class IStartupEvent(IEvent):
     pass
 
+class IInitializeEvent(IEvent):
+    pass
+
 
 class IStorage(Interface):
     pass
