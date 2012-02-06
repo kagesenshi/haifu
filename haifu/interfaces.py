@@ -34,6 +34,17 @@ class IAuthService(Interface):
     def principal(**credentials):
         """ Return the principal id (user id) from the credentials """
 
+class IVerificationService(Interface):
+    """ Service for email verification of actions """
+    def send_verification(action_id, data):
+        """ return a verification ID """
+
+    def approve_verification(verification_id):
+        """ check the verification id, and trigger the associated action. 
+            return True for valid id, return False for unknown id """
+
+class IVerificationAction(Interface):
+    """ marker interface for verification actions. """
 
 class IEvent(Interface):
     pass
@@ -68,3 +79,5 @@ class IPerson(Interface):
 
     def validate_password(password):
         """ returns bool """
+
+
