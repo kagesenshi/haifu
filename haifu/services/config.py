@@ -8,7 +8,6 @@ class ConfigService(Service):
     grok.name('v1/config')
     classProvides(IService)
 
-    @require_auth
     def index(self):
         registry = zca.getUtility(IRegistry)
         return {
