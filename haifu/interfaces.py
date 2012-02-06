@@ -10,7 +10,7 @@ class IService(Interface):
 class IRegistry(Interface):
     """ Registry utility for site configurations"""
 
-    def get(key): pass
+    def get(key, type=None): pass
     def set(key, value): pass
 
 class IFormatter(Interface):

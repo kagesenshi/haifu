@@ -18,11 +18,11 @@ class ConfigService(Service):
                     'message': ''
                 },
                 'data': {
-                    'version': registry.get('site.version'),
+                    'version': registry.get('site.version', 'float'),
                     'website': registry.get('site.title'),
                     'host': registry.get('site.host'),
                     'contact': registry.get('site.contact'),
-                    'ssl': registry.get('site.ssl_enabled')
+                    'ssl': registry.get('site.ssl_enabled', 'boolean')
                 }
             }
         }
