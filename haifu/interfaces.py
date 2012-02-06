@@ -31,10 +31,6 @@ class IAuthService(Interface):
         """ Return the principal id (user id) from the credentials """
 
 
-class ISAEngine(Interface):
-    """ Marker interface for engine """
-    pass
-
 class IEvent(Interface):
     pass
 
