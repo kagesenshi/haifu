@@ -3,10 +3,15 @@ import tornado.ioloop
 import argh
 from zope.configuration.xmlconfig import xmlconfig
 import zope.component.event # enable event triggering
+import grokcore.component as grok
 from haifu.model import Application
 from haifu.event import StartupEvent
+from haifu.interfaces import IConfiguration
 from StringIO import StringIO
 from zope.event import notify
+import sys, os
+from ConfigParser import ConfigParser
+from zope.component import getGlobalSiteManager
 
 def hook_zca():
     xmlconfig(StringIO('''
@@ -14,11 +19,20 @@ def hook_zca():
         <include package="haifu"/>
     </configure>'''))
 
+def hook_config(path):
+
+    cp = ConfigParser()
+    if not os.path.exists(path):
+        print 'Warning: Config Not Found : %s' % path
+    else:
+        cp.read(path)
+    gsm = getGlobalSiteManager()
+    gsm.registerUtility(cp, IConfiguration)
+
 def start(port=8888):
     hook_zca()
     application = Application()
-    event = StartupEvent()
-    notify(event)
+    notify(StartupEvent())
     print "STARTED!!"
     application.listen(port)
     tornado.ioloop.IOLoop.instance().start()
@@ -28,7 +42,23 @@ def fg():
     start()
 
 def main():
+    # extract out -C parameter
+    config = '/etc/haifu.cfg'
+    argv = []
+    skip = False
+    for index, item in enumerate(sys.argv):
+        if skip == True:
+            skip = False
+            continue
+        if item == '-C':
+            config = sys.argv[index+1]
+            skip = True
+        elif item.startswith('-C'):
+            config = item[2:]
+        else:
+            argv.append(item)
+    hook_config(config)
     parser = argh.ArghParser()
     parser.add_commands([fg])
-    parser.dispatch()
+    parser.dispatch(argv[1:])
 

@@ -1,5 +1,9 @@
 from zope.interface import Interface, Attribute
 
+class IConfiguration(Interface):
+    """ marker interface for a global 
+        configparser object storing system config """
+
 class IService(Interface):
     """ marker interface for a service """
 

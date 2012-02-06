@@ -1,15 +1,20 @@
-from sqlalchemy import Table, Column, Integer, MetaData, String
+from sqlalchemy import Table, Column, Integer, MetaData, String, create_engine
 from sqlalchemy.orm import mapper
-from haifu.interfaces import IStartupEvent
-from haifu.storage.saconfig import named_scoped_session
+from haifu.interfaces import IStartupEvent, IConfiguration
+from haifu.storage.saconfig import named_scoped_session, IEngineFactory
 import grokcore.component as grok
+import zope.component as zca
 
 metadata = MetaData()
 
 @grok.subscribe(IStartupEvent)
 def handler(event):
-    session = named_scoped_session('haifu.storage')
-    metadata.create_all(session.bind)
+    config = zca.getUtility(IConfiguration)
+    gsm = zca.getGlobalSiteManager()
+    dburi = config.get('saconfig', 'haifu.storage')
+    engine = create_engine(dburi)
+    gsm.registerUtility(lambda: engine, IEngineFactory, name='haifu.storage')
+    metadata.create_all(engine)
 
 class Model(object):
     def __init__(self, **kw):
