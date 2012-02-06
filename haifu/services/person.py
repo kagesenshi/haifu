@@ -1,4 +1,6 @@
-from haifu.interfaces import IService, IAuthService, IPersonStorage
+from haifu.interfaces import (IService, IAuthService, IPersonStorage,
+                              IVerificationService, IVerificationAction,
+                              IVerificationEvent)
 from zope.interface import classProvides
 import grokcore.component as grok
 import zope.component as zca
@@ -53,7 +55,7 @@ class PersonService(Service):
             return {'ocs': ocshelper.meta(False, 102, 
                         'please specify a password longer than 8 characters')}
 
-        if not re.match(r'^[A-Z0-9]{0,9999}$', login):
+        if not re.match(r'^[A-Za-z0-9]{0,9999}$', login):
             return {'ocs': ocshelper.meta(False, 102, 
                         'login can only consist of alphanumeric characters')}
 
@@ -71,17 +73,26 @@ class PersonService(Service):
             return {'ocs': ocshelper.meta(False, 105,
                 '%s already have an account associated' % login)}
 
-        storage.add_person(
-            login=login,
-            password=password,
-            firstname=firstname,
-            lastname=lastname,
-            email=email
+        vs = zca.getUtility(IVerificationService)
+        vs.send_verification('haifu.verify.person', {
+            'login': login,
+            'password': password,
+            'firstname': firstname,
+            'lastname': lastname,
+            'email': email }, 
+            unique_key='%s:%s' % (login, email)
         )
 
         return {'ocs': ocshelper.meta()}
-            
 
+
+class IPersonVerificationEvent(IVerificationEvent):
+    pass
+
+@grok.subscribe(IPersonVerificationEvent)
+def handler(event):
+    storage = zca.getUtility(IPersonStorage)
+    storage.add_person(**event.data)
 
 class SimpleBasicAuthService(grok.GlobalUtility):
     grok.implements(IAuthService)
@@ -140,3 +151,13 @@ class SimpleBasicAuthService(grok.GlobalUtility):
             person = storage.get_person_by_apikey(login)
 
         return person.principal
+
+
+class PersonVerificationEvent(grok.GlobalUtility):
+    grok.implements(IPersonVerificationEvent)
+    grok.name('haifu.verify.person')
+    grok.direct()
+    classProvides(IVerificationAction)
+
+    def __init__(self, data):
+        self.data = data

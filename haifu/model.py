@@ -10,6 +10,8 @@ import traceback
 from haifu.exc import HTTPException
 from haifu.decorator import (error_handler, formattransformer,
                                 httpexceptionhandler)
+from haifu.event import RequestFinishingEvent
+from zope.event import notify
 
 class Application(BaseApplication):
 
@@ -24,7 +26,10 @@ def handler_factory(func):
     method = getattr(func, '__haifu_method__', 'get')
 
     class Handler(RequestHandler):
-        pass
+
+        def finish(self, *args, **kwargs):
+            notify(RequestFinishingEvent(self))
+            return super(Handler, self).finish(*args, **kwargs)
 
     setattr(Handler, method, 
         formattransformer(

@@ -36,8 +36,13 @@ class IAuthService(Interface):
 
 class IVerificationService(Interface):
     """ Service for email verification of actions """
-    def send_verification(action_id, data):
-        """ return a verification ID """
+    def send_verification(action_id, data, unique_key=None):
+        """ return a verification ID 
+
+            unique_key parameter is used for determining unique of 
+            the entry. if duplicate is found, the old verification id 
+            is deleted, and a new one is generated.
+        """
 
     def approve_verification(verification_id):
         """ check the verification id, and trigger the associated action. 
@@ -46,6 +51,22 @@ class IVerificationService(Interface):
 class IVerificationAction(Interface):
     """ marker interface for verification actions. """
 
+class IVerificationStorage(Interface):
+    """ global utility which stores verification entries """
+
+    def add_entry(key, action_id, data, unique_key):
+        """ add an entry. delete old entry if unique_key matches """
+
+    def get_entry(key):
+        """ returns IVerificationEntry object from the entry key """
+
+    def delete_entry(key):
+        """ delete entry which matches the key """
+
+class IVerificationEntry(Interface):
+    action_id = Attribute('Action ID')
+    data = Attribute('Action Data')
+
 class IEvent(Interface):
     pass
 
@@ -53,6 +74,15 @@ class IStartupEvent(IEvent):
     pass
 
 class IInitializeEvent(IEvent):
+    pass
+
+class IRequestFinishingEvent(IEvent):
+    pass
+
+class IVerificationEvent(IEvent):
+    data = Attribute('Event data')
+
+class IPersonVerificationEvent(IVerificationEvent):
     pass
 
 

@@ -1,4 +1,5 @@
-from sqlalchemy import Table, Column, Integer, MetaData, String, create_engine
+from sqlalchemy import (Table, Column, Integer, MetaData, String, 
+                        create_engine, UnicodeText)
 from sqlalchemy.orm import mapper
 from haifu.interfaces import IStartupEvent, IConfiguration
 from haifu.storage.saconfig import named_scoped_session
@@ -30,3 +31,17 @@ class Person(Model):
     pass
 
 mapper(Person, person)
+
+
+verification_entry = Table('verification_entry', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('action_id', String(255)),
+    Column('data', UnicodeText),
+    Column('unique_key', String(255)),
+    Column('key', String(255))
+)
+
+class VerificationEntry(Model):
+    pass
+
+mapper(VerificationEntry, verification_entry)

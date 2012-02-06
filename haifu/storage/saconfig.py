@@ -1,6 +1,7 @@
 import zope.component as zca
 import grokcore.component as grok
-from haifu.interfaces import IInitializeEvent, IConfiguration
+from haifu.interfaces import (IInitializeEvent, IConfiguration,
+                                IRequestFinishingEvent)
 from zope.interface import Interface
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
@@ -28,3 +29,10 @@ def handler(event):
     for name, dburi in config.items('saconfig'):
         engine = create_engine(dburi)
         gsm.registerUtility(lambda: engine, IEngineFactory, name=name)
+
+@grok.subscribe(IRequestFinishingEvent)
+def request_finish(event):
+    config = zca.getUtility(IConfiguration)
+    for name, dburi in config.items('saconfig'):
+        session = named_scoped_session(name)
+        session.commit()
