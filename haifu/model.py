@@ -10,8 +10,9 @@ import traceback
 from haifu.exc import HTTPException
 from haifu.decorator import (error_handler, formattransformer,
                                 httpexceptionhandler)
-from haifu.event import RequestFinishingEvent
+from haifu.event import RequestFinishingEvent, RequestStartingEvent
 from zope.event import notify
+import zope.component as zca
 
 class Application(BaseApplication):
 
@@ -27,9 +28,17 @@ def handler_factory(func):
 
     class Handler(RequestHandler):
 
+        def prepare(self):
+            notify(RequestStartingEvent(self))
+            self._current_user = None
+
         def finish(self, *args, **kwargs):
             notify(RequestFinishingEvent(self))
+            self._current_user = None
             return super(Handler, self).finish(*args, **kwargs)
+
+        def get_current_user(self):
+            return self._current_user
 
     setattr(Handler, method, 
         formattransformer(
@@ -61,7 +70,7 @@ class Service(grok.GlobalUtility):
                 # not a function, skip~~
                 continue
 
-            if func.func_name == 'index':
+            if attr == 'index':
                 # index is the default page
                 handlers.append((r'/?', handler_factory(func)))
                 continue
@@ -72,7 +81,11 @@ class Service(grok.GlobalUtility):
             )
 
             #if theres arguments, include em
-            argcount = len(inspect.getargs(func.func_code).args) - 1
+            
+            argcount = getattr(
+                func, '__haifu_argcount__',
+                len(inspect.getargs(func.func_code).args) - 1
+            )
             if argcount > 0:
                 handlers.append(
                     (r'/' + attr + r'/(.*)' * argcount + r'/?',

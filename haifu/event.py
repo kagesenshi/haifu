@@ -1,5 +1,5 @@
 from haifu.interfaces import (IStartupEvent, IInitializeEvent,
-                              IRequestFinishingEvent)
+                              IRequestFinishingEvent, IRequestStartingEvent)
 import grokcore.component as grok
 
 class StartupEvent(object):
@@ -10,6 +10,12 @@ class InitializeEvent(object):
 
 class RequestFinishingEvent(object):
     grok.implements(IRequestFinishingEvent)
+
+    def __init__(self, handler):
+        self.handler = handler
+
+class RequestStartingEvent(object):
+    grok.implements(IRequestStartingEvent)
 
     def __init__(self, handler):
         self.handler = handler

@@ -5,6 +5,12 @@ from haifu import util
 import traceback
 import base64
 from tornado.escape import xhtml_escape
+import inspect
+
+def _preserve_argcount(decorator, func):
+    argcount = getattr(func, '__haifu_argcount__', 
+        len(inspect.getargs(func.func_code).args) - 1)
+    decorator.__haifu_argcount__ = argcount
 
 def method(method='get'):
     """ decorator to set the method of the function """
@@ -28,6 +34,7 @@ def error_handler(func):
             ))
             traceback.print_exc()
             raise error
+    _preserve_argcount(wrapper, func)
     wrapper.func_name = func.func_name
     return wrapper
 
@@ -39,6 +46,8 @@ def formattransformer(func):
         formatter = getUtility(IFormatter, name=format_)
         self.set_header('Content-Type', formatter.content_type)
         self.write(formatter.format(value))
+
+    _preserve_argcount(wrapper, func)
     wrapper.func_name = func.func_name
     return wrapper
 
@@ -55,6 +64,7 @@ def httpexceptionhandler(func):
             self._transforms = []
             return {'ocs': result}
         return result
+    _preserve_argcount(wrapper, func)
     wrapper.func_name = func.func_name
     return wrapper
 
@@ -64,7 +74,8 @@ def require_auth(func):
         credentials = auth.extract_credentials(self.request)            
         if not auth.authenticate(credentials):
             raise Unauthorized
+        self._current_user = auth.principal(credentials)
         return func(self, *args, **kwargs)
-
+    _preserve_argcount(wrapper, func)
     wrapper.func_name = func.func_name
     return wrapper

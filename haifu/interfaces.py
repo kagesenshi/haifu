@@ -95,6 +95,9 @@ class IStartupEvent(IEvent):
 class IInitializeEvent(IEvent):
     pass
 
+class IRequestStartingEvent(IEvent):
+    pass
+
 class IRequestFinishingEvent(IEvent):
     pass
 
