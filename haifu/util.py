@@ -1,4 +1,4 @@
-
+import zope.component as zca
 
 def meta(success=True, statuscode=100, message=''):
     if success:

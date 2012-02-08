@@ -5,7 +5,7 @@ from zope.interface import classProvides
 import grokcore.component as grok
 import zope.component as zca
 from haifu.api import Service, method
-from haifu import ocshelper
+from haifu import util
 import base64
 import re
 
@@ -19,7 +19,7 @@ class PersonService(Service):
         password = self.get_argument('password', None)
 
         if login is None:
-            return {'ocs': ocshelper.meta(False, 101, 
+            return {'ocs': util.meta(False, 101, 
                 'please specify all mandatory fields ')
             }
 
@@ -30,10 +30,10 @@ class PersonService(Service):
         }
 
         if not auth.authenticate(credentials):
-            return {'ocs': ocshelper.meta(False, 102, 
+            return {'ocs': util.meta(False, 102, 
                 'login not valid')}
 
-        result = ocshelper.meta()
+        result = util.meta()
         principal = auth.principal(credentials)
         result.update({'data': { 'person': {'personid': principal}}})
         return {'ocs': result}
@@ -48,31 +48,31 @@ class PersonService(Service):
         email = self.get_argument('email', None)
 
         if not (login and password and firstname and lastname and email):
-            return {'ocs': ocshelper.meta(False, 101, 
+            return {'ocs': util.meta(False, 101, 
                         'please specify all mandatory fields')}
 
         if len(password) < 8:
-            return {'ocs': ocshelper.meta(False, 102, 
+            return {'ocs': util.meta(False, 102, 
                         'please specify a password longer than 8 characters')}
 
         if not re.match(r'^[A-Za-z0-9]{0,9999}$', login):
-            return {'ocs': ocshelper.meta(False, 102, 
+            return {'ocs': util.meta(False, 102, 
                         'login can only consist of alphanumeric characters')}
 
         if '@' not in email:
             # not sure whats the best email validator parser around
-            return {'ocs': ocshelper.meta(False, 106,
+            return {'ocs': util.meta(False, 106,
                 'invalid email')}
 
         storage = zca.getUtility(IPersonStorage)
         vstorage = zca.getUtility(IVerificationStorage)
         if (storage.get_person(login) or 
             vstorage.has_entry('haifu.verify.person', login)):
-            return {'ocs': ocshelper.meta(False, 104, 
+            return {'ocs': util.meta(False, 104, 
                 '%s already taken, please choose a different login' % login)}
 
         if storage.get_person_by_email(email):
-            return {'ocs': ocshelper.meta(False, 105,
+            return {'ocs': util.meta(False, 105,
                 '%s already have an account associated' % email)}
 
         vs = zca.getUtility(IVerificationService)
@@ -85,7 +85,7 @@ class PersonService(Service):
             unique_key=login
         )
 
-        return {'ocs': ocshelper.meta()}
+        return {'ocs': util.meta()}
 
 
 class IPersonVerificationEvent(IVerificationEvent):

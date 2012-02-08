@@ -2,7 +2,7 @@ from haifu.api import Service
 from haifu.interfaces import (IService, IVerificationService,
                                 IVerificationAction,
                                 IVerificationStorage)
-from haifu import ocshelper
+from haifu import util
 import grokcore.component as grok
 import zope.component as zca
 from zope.interface import classProvides
@@ -18,8 +18,8 @@ class Verification(Service):
         if key:
             vs = zca.getUtility(IVerificationService)
             if vs.approve_verification(key):
-                return {'ocs': ocshelper.meta(message='verification successful')}
-        return {'ocs': ocshelper.meta(False, 101, 'unknown key')}
+                return {'ocs': util.meta(message='verification successful')}
+        return {'ocs': util.meta(False, 101, 'unknown key')}
 
 
 class EmailVerificationService(grok.GlobalUtility):

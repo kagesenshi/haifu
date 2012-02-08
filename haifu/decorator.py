@@ -1,7 +1,7 @@
 from haifu.exc import HTTPException, Unauthorized, InternalError
 from zope.component import getUtility, getUtilitiesFor
 from haifu.interfaces import IService, IFormatter, IAuthService
-from haifu import ocshelper
+from haifu import util
 import traceback
 import base64
 from tornado.escape import xhtml_escape
@@ -51,7 +51,7 @@ def httpexceptionhandler(func):
             for k, v in e.headers:
                 self.set_header(k, v)
             message = '%s: %s' % (e.code, e.message)
-            result = ocshelper.meta(False, 999, message)
+            result = util.meta(False, 999, message)
             self._transforms = []
             return {'ocs': result}
         return result
