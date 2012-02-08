@@ -1,17 +1,22 @@
 from haifu.interfaces import IVerificationStorage, IVerificationEntry
 from haifu.storage.saconfig import named_scoped_session
 from haifu.storage.db import VerificationEntry
+from sqlalchemy import and_
 import grokcore.component as grok
 import simplejson
+from datetime import datetime, timedelta
 
 class SQLAlchemyVerificationStorage(grok.GlobalUtility):
     grok.implements(IVerificationStorage)
 
-    def add_entry(self, key, action_id, data, unique_key):
+    def add_entry(self, key, action_id, data, unique_key, timestamp=None):
+        if timestamp is None:
+            timestamp = datetime.utcnow()
         session = named_scoped_session('haifu.storage')
         # delete old entries with the same unique key
         entries = session.query(VerificationEntry).filter(
-            VerificationEntry.unique_key==unique_key)
+            and_(VerificationEntry.action_id==action_id,
+            VerificationEntry.unique_key==unique_key))
         for entry in entries:
             session.delete(entry)
 
@@ -19,10 +24,20 @@ class SQLAlchemyVerificationStorage(grok.GlobalUtility):
         jsondata = simplejson.dumps(data)
         entry = VerificationEntry(
             key=key, action_id=action_id, data=jsondata,
-            unique_key=unique_key
+            unique_key=unique_key,
+            timestamp=timestamp
         )
 
         session.add(entry)
+
+    def has_entry(self, action_id, unique_key):
+        session = named_scoped_session('haifu.storage')
+        if session.query(VerificationEntry).filter(
+                and_(VerificationEntry.action_id==action_id,
+                VerificationEntry.unique_key==unique_key)
+            ).first():
+            return True
+        return False
 
     def get_entry(self, key):
         session = named_scoped_session('haifu.storage')
@@ -34,6 +49,15 @@ class SQLAlchemyVerificationStorage(grok.GlobalUtility):
         session = named_scoped_session('haifu.storage')
         entries = session.query(VerificationEntry).filter(
                 VerificationEntry.key==key)
+        for entry in entries:
+            session.delete(entry)
+
+    def expire_entries(self, age=24):
+        delta = datetime.timedelta(0,age*60*60)
+        youngest = datetime.utcnow() - delta
+        entries = session.query(VerificationEntry).filter(
+            VerificationEntry.timestamp<=youngest
+        )
         for entry in entries:
             session.delete(entry)
 

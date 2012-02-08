@@ -1,6 +1,6 @@
 from haifu.interfaces import (IService, IAuthService, IPersonStorage,
                               IVerificationService, IVerificationAction,
-                              IVerificationEvent)
+                              IVerificationEvent, IVerificationStorage)
 from zope.interface import classProvides
 import grokcore.component as grok
 import zope.component as zca
@@ -65,13 +65,15 @@ class PersonService(Service):
                 'invalid email')}
 
         storage = zca.getUtility(IPersonStorage)
-        if storage.get_person(login):
+        vstorage = zca.getUtility(IVerificationStorage)
+        if (storage.get_person(login) or 
+            vstorage.has_entry('haifu.verify.person', login)):
             return {'ocs': ocshelper.meta(False, 104, 
-                '%s already exist, please choose a different login' % login)}
+                '%s already taken, please choose a different login' % login)}
 
         if storage.get_person_by_email(email):
             return {'ocs': ocshelper.meta(False, 105,
-                '%s already have an account associated' % login)}
+                '%s already have an account associated' % email)}
 
         vs = zca.getUtility(IVerificationService)
         vs.send_verification('haifu.verify.person', {
@@ -80,7 +82,7 @@ class PersonService(Service):
             'firstname': firstname,
             'lastname': lastname,
             'email': email }, 
-            unique_key='%s:%s' % (login, email)
+            unique_key=login
         )
 
         return {'ocs': ocshelper.meta()}

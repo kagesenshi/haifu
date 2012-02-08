@@ -1,5 +1,5 @@
 from sqlalchemy import (Table, Column, Integer, MetaData, String, 
-                        create_engine, UnicodeText)
+                        create_engine, UnicodeText, DateTime)
 from sqlalchemy.orm import mapper
 from haifu.interfaces import IStartupEvent, IConfiguration
 from haifu.storage.saconfig import named_scoped_session
@@ -38,7 +38,8 @@ verification_entry = Table('verification_entry', metadata,
     Column('action_id', String(255)),
     Column('data', UnicodeText),
     Column('unique_key', String(255)),
-    Column('key', String(255))
+    Column('key', String(255)),
+    Column('timestamp', DateTime)
 )
 
 class VerificationEntry(Model):

@@ -54,14 +54,33 @@ class IVerificationAction(Interface):
 class IVerificationStorage(Interface):
     """ global utility which stores verification entries """
 
-    def add_entry(key, action_id, data, unique_key):
-        """ add an entry. delete old entry if unique_key matches """
+    def add_entry(key, action_id, data, unique_key, timestamp=None):
+        """ 
+            add an entry. delete old entry if unique_key matches.
+
+            store timestamp as current UTC time if not specified, 
+            if specified, use the specified time, converted to UTC
+            if possible.
+        
+        """
 
     def get_entry(key):
         """ returns IVerificationEntry object from the entry key """
 
+    def has_entry(action_id, unique_key):
+        """ 
+            return boolean whether theres matching entry of action_id and 
+            unique_key
+        """
+
     def delete_entry(key):
         """ delete entry which matches the key """
+
+    def expire_entries(age=24):
+        """ 
+            expire old entries. delete entries older than 
+            the specified age, in hour 
+        """
 
 class IVerificationEntry(Interface):
     action_id = Attribute('Action ID')
