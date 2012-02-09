@@ -23,38 +23,54 @@ class Application(BaseApplication):
                 handlers.append((r'/' + name + pattern, handler))
         super(Application, self).__init__(handlers)
 
-def handler_factory(cls, attr):
-    func = getattr(cls, attr)
-    method = getattr(func, '__haifu_method__', 'get')
 
-    class Handler(RequestHandler):
+class BaseHandler(RequestHandler):
 
-        def prepare(self):
-            notify(RequestStartingEvent(self))
-            self._current_user = None
+    def prepare(self):
+        notify(RequestStartingEvent(self))
+        self._current_user = None
 
-        def finish(self, *args, **kwargs):
-            notify(RequestFinishingEvent(self))
-            self._current_user = None
-            return super(Handler, self).finish(*args, **kwargs)
+    def finish(self, *args, **kwargs):
+        notify(RequestFinishingEvent(self))
+        self._current_user = None
+        return super(BaseHandler, self).finish(*args, **kwargs)
 
-        def get_current_user(self):
-            return self._current_user
+    def get_current_user(self):
+        return self._current_user
 
-    def wrapper(self, *args, **kwargs):
-        service = cls(self)
-        return getattr(service, attr)(*args, **kwargs)
 
-    setattr(Handler, method, 
-        formattransformer(
-            httpexceptionhandler(
-                error_handler(
-                    wrapper
+class HandlerRegistry(object):
+
+    def __init__(self):
+        self.registry = {}
+
+    def append(self, pattern, cls, attr):
+        if pattern in self.registry:
+            handler = self.registry[pattern]
+            self._hook_method_handler(handler, cls, attr)
+        else:
+            handler = type('Handler', (BaseHandler,), {})
+            self._hook_method_handler(handler, cls, attr)
+            self.registry[pattern] = handler
+
+    def _hook_method_handler(self, handler, cls, attr):
+        func = getattr(cls, attr)
+        method = getattr(func, '__haifu_method__', 'get')
+        def wrapper(self, *args, **kwargs):
+            service = cls(self)
+            return getattr(service, attr)(*args, **kwargs)
+        setattr(handler, method, 
+            formattransformer(
+                httpexceptionhandler(
+                    error_handler(
+                        wrapper
+                    )
                 )
             )
         )
-    )
-    return Handler
+
+    def items(self):
+        return self.registry.items()
 
 class Service(grok.GlobalUtility):
     implements(IService)
@@ -67,7 +83,7 @@ class Service(grok.GlobalUtility):
 
     @classmethod
     def __handlers__(cls):
-        handlers = []
+        handlers = HandlerRegistry()
         for attr in dir(cls):
             if attr.startswith('_'):
                 # dont include internal/private stuff
@@ -79,15 +95,13 @@ class Service(grok.GlobalUtility):
                 # not a function, skip~~
                 continue
 
-            if attr == 'index':
+            if func.func_name == 'index':
                 # index is the default page
-                handlers.append((r'/?', handler_factory(cls, attr)))
+                handlers.append(r'/?', cls, attr)
                 continue
 
             # always hook the function
-            handlers.append(
-                (r'/' + attr + r'/?', handler_factory(cls, attr)),
-            )
+            handlers.append(r'/' + func.func_name + r'/?', cls, attr)
 
             #if theres arguments, include em
             
@@ -97,7 +111,7 @@ class Service(grok.GlobalUtility):
             )
             if argcount > 0:
                 handlers.append(
-                    (r'/' + attr + r'/(.*)' * argcount + r'/?',
-                    handler_factory(cls, attr))
+                    r'/' + func.func_name + r'/(.*)' * argcount + r'/?',
+                    cls, attr
                 )
-        return handlers
+        return handlers.items()
