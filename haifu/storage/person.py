@@ -59,3 +59,15 @@ class SQLPersonAdapter(grok.Adapter):
         return {
             'personid': self.context.login
         }
+
+    def set_properties(self, data):
+        pass
+
+    def set_xattr(self, app, key):
+        pass
+
+    def get_xattr(self, app, key):
+        pass
+
+    def delete_xattr(self, app, key):
+        pass

@@ -137,5 +137,21 @@ class IPerson(Interface):
         """ return a dictionary of person properties 
             
             refer:
-            http://freedesktop.org/wiki/Specifications/open-collaboration-services#get_self
+            http://freedesktop.org/wiki/Specifications/open-collaboration-services#get
+        """
+
+    def set_properties(data):
+        """
+            accepts a dictionary, set the person main properties
+        """
+
+    def get_balance():
+        """
+            return account balance. 
+            format: 
+            
+            {
+                'currency': 'USD',
+                'balance': 1.49
+            }
         """

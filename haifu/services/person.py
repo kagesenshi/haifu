@@ -4,7 +4,7 @@ from haifu.interfaces import (IService, IAuthService, IPersonStorage,
 from zope.interface import classProvides
 import grokcore.component as grok
 import zope.component as zca
-from haifu.api import Service, method, require_auth
+from haifu.api import Service, method, require_auth, node_name
 from haifu import util
 import base64
 import re
@@ -105,6 +105,99 @@ class PersonService(Service):
         }
 
         return {'ocs': result}
+
+    @require_auth
+    def self(self):
+        principal = self.handler.get_current_user()
+        storage = zca.getUtility(IPersonStorage)
+        person = storage.get_person(principal)
+        result = util.meta()
+        result['data'] = {
+            'person': person.get_properties()
+        }
+        return {'ocs': result}
+
+    @node_name('self')
+    @method('post')
+    @require_auth
+    def set_self(self):
+        data = util.extract_data(self.handler, ['latitude', 'longitude', 'city',
+                                                'country'])
+        has_param = False
+        for key, value in data.items():
+            if value != None:
+                has_param = True
+                break
+
+        if not has_param:
+            return {
+                'ocs': util.meta(False, 101, 'No parameter to update found')
+            }
+
+        principal = self.handler.get_current_user()
+        storage = zca.getUtility(IPersonStorage)
+        person = storage.get_person(principal)
+
+        person.set_properties(data)
+
+        return {'ocs': util.meta()}
+
+    @require_auth
+    def balance(self):
+        principal = self.handler.get_current_user()
+        storage = zca.getUtility(IPersonStorage)
+        person = storage.get_person(principal)
+
+        result = util.meta()
+        result['data'] = {
+            'person': person.get_balance()
+        }
+
+        return {'ocs': result}
+
+    @require_auth
+    def attributes(self, person_id, app=None, key=None):
+        storage = zca.getUtility(IPersonStorage)
+        person = storage.get_person(person_id)
+
+        result = util.meta()
+        result['data'] = {
+            'attribute': person.get_xattr(app, key)
+        }
+
+        return {
+            'ocs': result
+        }
+
+
+    @require_auth
+    @method('post')
+    def setattribute(self, app, key):
+        data = util.extract_data(self.handler, ['value'])
+
+        principal = self.handler.get_current_user()
+        storage = zca.getUtility(IPersonStorage)
+        person = storage.get_person(principal)
+
+        person.set_xattr(app, key, value)
+
+        return {
+            'ocs': util.meta()
+        }
+
+    @require_auth
+    @method('post')
+    def deleteattribute(self, app, key):
+        principal = self.handler.get_current_user()
+        storage = zca.getUtility(IPersonStorage)
+        person = storage.get_person(principal)
+
+        person.delete_xattr(app, key, value)
+
+        return {
+            'ocs': util.meta()
+        }
+
 
 
 class IPersonVerificationEvent(IVerificationEvent):
