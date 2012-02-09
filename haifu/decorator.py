@@ -75,8 +75,15 @@ def require_auth(func):
         credentials = auth.extract_credentials(self.request)            
         if not auth.authenticate(credentials):
             raise Unauthorized
-        self._current_user = auth.principal(credentials)
+        self.handler._current_user = auth.principal(credentials)
         return func(self, *args, **kwargs)
     _preserve_argcount(wrapper, func)
     wrapper.func_name = func.func_name
     return wrapper
+
+def node_name(name):
+    def wrapper(func):
+        func.func_name = name
+        return func
+    return wrapper
+
