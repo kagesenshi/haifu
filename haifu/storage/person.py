@@ -55,6 +55,9 @@ class SQLPersonAdapter(grok.Adapter):
             return True
         return False
 
+    def viewable_by(self, principal):
+        return True
+
     def get_properties(self):
         return {
             'personid': self.context.login

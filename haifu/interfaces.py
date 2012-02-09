@@ -155,3 +155,9 @@ class IPerson(Interface):
                 'balance': 1.49
             }
         """
+
+    def viewable_by(principal):
+        """
+            return boolean on whether principal have permission
+            to view this person
+        """
