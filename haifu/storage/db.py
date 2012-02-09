@@ -46,3 +46,16 @@ class VerificationEntry(Model):
     pass
 
 mapper(VerificationEntry, verification_entry)
+
+
+activity = Table('activity', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('person_id', String(255)),
+    Column('data', UnicodeText),
+    Column('timestamp', DateTime)
+)
+
+class Activity(Model):
+    pass
+
+mapper(Activity, activity)

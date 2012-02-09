@@ -161,3 +161,25 @@ class IPerson(Interface):
             return boolean on whether principal have permission
             to view this person
         """
+
+
+class IActivityStorage(IStorage):
+
+    def add_activity(person_id, data, timestamp=None):
+        """
+            Add activity stream item. if timestamp is None, use current utc
+            datetime
+        """
+
+    def get_activities(person_id, limit=None, offset=None):
+        """
+            return list of IActivity.
+        """
+
+
+class IActivity(Interface):
+
+    def data():
+        """
+            return dictionary containing activity data
+        """
