@@ -95,13 +95,16 @@ class Service(grok.GlobalUtility):
                 # not a function, skip~~
                 continue
 
-            if func.func_name == 'index':
+            prefix = func.func_name
+
+            if prefix == 'index':
                 # index is the default page
-                handlers.append(r'/?', cls, attr)
-                continue
+                prefix = r''
+            else:
+                prefix = r'/' + prefix
 
             # always hook the function
-            handlers.append(r'/' + func.func_name + r'/?', cls, attr)
+            handlers.append(prefix + r'/?', cls, attr)
 
             #if theres arguments, include em
             
@@ -111,7 +114,7 @@ class Service(grok.GlobalUtility):
             )
             if argcount > 0:
                 handlers.append(
-                    r'/' + func.func_name + r'/(.*)' * argcount + r'/?',
+                    prefix + r'/(.*?)' * argcount + r'/?',
                     cls, attr
                 )
         return handlers.items()
