@@ -63,6 +63,7 @@ class Service(grok.GlobalUtility):
 
     def __init__(self, handler):
         self.handler = handler
+        self.request = handler.request
 
     @classmethod
     def __handlers__(cls):
