@@ -133,3 +133,9 @@ class IPerson(Interface):
         """ returns bool """
 
 
+    def get_properties():
+        """ return a dictionary of person properties 
+            
+            refer:
+            http://freedesktop.org/wiki/Specifications/open-collaboration-services#get_self
+        """

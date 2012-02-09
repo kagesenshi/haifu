@@ -4,7 +4,7 @@ from haifu.interfaces import (IService, IAuthService, IPersonStorage,
 from zope.interface import classProvides
 import grokcore.component as grok
 import zope.component as zca
-from haifu.api import Service, method
+from haifu.api import Service, method, require_auth
 from haifu import util
 import base64
 import re
@@ -86,6 +86,25 @@ class PersonService(Service):
         )
 
         return {'ocs': util.meta()}
+
+    @require_auth
+    def data(self, person_id):
+        storage = zca.getUtility(IPersonStorage)
+        person = storage.get_person(person_id)
+        if not person:
+            return {'ocs': util.meta(False, 101, 
+                    'unknown user id')}
+
+        if not person.viewable_by(self.get_current_user()):
+            return {'ocs': util.meta(False, 102,
+                    'user is private')}
+
+        result = util.meta()
+        result['data'] = {
+            'person': person.get_properties()
+        }
+
+        return {'ocs': result}
 
 
 class IPersonVerificationEvent(IVerificationEvent):

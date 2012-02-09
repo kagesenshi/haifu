@@ -54,3 +54,8 @@ class SQLPersonAdapter(grok.Adapter):
         if self.context.password == hashed_pw:
             return True
         return False
+
+    def get_properties(self):
+        return {
+            'personid': self.context.login
+        }
