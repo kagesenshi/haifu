@@ -23,7 +23,8 @@ class Application(BaseApplication):
                 handlers.append((r'/' + name + pattern, handler))
         super(Application, self).__init__(handlers)
 
-def handler_factory(func):
+def handler_factory(cls, attr):
+    func = getattr(cls, attr)
     method = getattr(func, '__haifu_method__', 'get')
 
     class Handler(RequestHandler):
@@ -40,11 +41,15 @@ def handler_factory(func):
         def get_current_user(self):
             return self._current_user
 
+    def wrapper(self, *args, **kwargs):
+        service = cls(self)
+        return getattr(service, attr)(*args, **kwargs)
+
     setattr(Handler, method, 
         formattransformer(
             httpexceptionhandler(
                 error_handler(
-                    func.im_func
+                    wrapper
                 )
             )
         )
@@ -55,6 +60,9 @@ class Service(grok.GlobalUtility):
     implements(IService)
     grok.direct()
     grok.baseclass()
+
+    def __init__(self, handler):
+        self.handler = handler
 
     @classmethod
     def __handlers__(cls):
@@ -72,12 +80,12 @@ class Service(grok.GlobalUtility):
 
             if attr == 'index':
                 # index is the default page
-                handlers.append((r'/?', handler_factory(func)))
+                handlers.append((r'/?', handler_factory(cls, attr)))
                 continue
 
             # always hook the function
             handlers.append(
-                (r'/' + attr + r'/?', handler_factory(func)),
+                (r'/' + attr + r'/?', handler_factory(cls, attr)),
             )
 
             #if theres arguments, include em
@@ -89,6 +97,6 @@ class Service(grok.GlobalUtility):
             if argcount > 0:
                 handlers.append(
                     (r'/' + attr + r'/(.*)' * argcount + r'/?',
-                    handler_factory(func))
+                    handler_factory(cls, attr))
                 )
         return handlers

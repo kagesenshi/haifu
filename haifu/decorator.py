@@ -12,6 +12,7 @@ def _preserve_argcount(decorator, func):
         len(inspect.getargs(func.func_code).args) - 1)
     decorator.__haifu_argcount__ = argcount
 
+
 def method(method='get'):
     """ decorator to set the method of the function """
     def wrapper(func):

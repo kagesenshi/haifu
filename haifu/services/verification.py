@@ -14,7 +14,7 @@ class Verification(Service):
     classProvides(IService)
 
     def index(self):
-        key = self.get_argument('key', None)
+        key = self.handler.get_argument('key', None)
         if key:
             vs = zca.getUtility(IVerificationService)
             if vs.approve_verification(key):

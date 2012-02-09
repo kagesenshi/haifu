@@ -15,8 +15,8 @@ class PersonService(Service):
 
     @method('post')
     def check(self):
-        login = self.get_argument('login', None)
-        password = self.get_argument('password', None)
+        login = self.handler.get_argument('login', None)
+        password = self.handler.get_argument('password', None)
 
         if login is None:
             return {'ocs': util.meta(False, 101, 
@@ -41,11 +41,11 @@ class PersonService(Service):
 
     @method('post')
     def add(self):
-        login = self.get_argument('login', None)
-        password = self.get_argument('password', None)
-        firstname = self.get_argument('firstname', None)
-        lastname = self.get_argument('lastname', None)
-        email = self.get_argument('email', None)
+        login = self.handler.get_argument('login', None)
+        password = self.handler.get_argument('password', None)
+        firstname = self.handler.get_argument('firstname', None)
+        lastname = self.handler.get_argument('lastname', None)
+        email = self.handler.get_argument('email', None)
 
         if not (login and password and firstname and lastname and email):
             return {'ocs': util.meta(False, 101, 
@@ -95,7 +95,7 @@ class PersonService(Service):
             return {'ocs': util.meta(False, 101, 
                     'unknown user id')}
 
-        if not person.viewable_by(self.get_current_user()):
+        if not person.viewable_by(self.handler.get_current_user()):
             return {'ocs': util.meta(False, 102,
                     'user is private')}
 
