@@ -1,5 +1,8 @@
 import tornado.web
 import tornado.ioloop
+import tornado.process
+import tornado.netutil
+from tornado.httpserver import HTTPServer
 import argh
 from zope.configuration.xmlconfig import xmlconfig
 import zope.component.event # enable event triggering
@@ -19,13 +22,7 @@ def hook_zca():
         <include package="haifu"/>
     </configure>'''))
 
-def hook_config(path):
-
-    cp = ConfigParser()
-    if not os.path.exists(path):
-        print 'Warning: Config Not Found : %s' % path
-    else:
-        cp.read(path)
+def hook_config(cp):
     gsm = getGlobalSiteManager()
     gsm.registerUtility(cp, IConfiguration)
 
@@ -58,8 +55,13 @@ def main():
             config = item[2:]
         else:
             argv.append(item)
-    hook_config(config)
+
+    cp = ConfigParser()
+    if not os.path.exists(config):
+        print 'Warning: Config Not Found : %s' % path
+    else:
+        cp.read(config)
+    hook_config(cp)
     parser = argh.ArghParser()
     parser.add_commands([fg])
     parser.dispatch(argv[1:])
-
