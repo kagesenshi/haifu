@@ -16,8 +16,8 @@ class PersonService(Service):
 
     @method('post')
     def check(self):
-        login = self.handler.get_argument('login', None)
-        password = self.handler.get_argument('password', None)
+        login = self.request.get('login', None)
+        password = self.request.get('password', None)
 
         if login is None:
             return Result(False, 101, 
@@ -41,11 +41,11 @@ class PersonService(Service):
 
     @method('post')
     def add(self):
-        login = self.handler.get_argument('login', None)
-        password = self.handler.get_argument('password', None)
-        firstname = self.handler.get_argument('firstname', None)
-        lastname = self.handler.get_argument('lastname', None)
-        email = self.handler.get_argument('email', None)
+        login = self.request.get('login', None)
+        password = self.request.get('password', None)
+        firstname = self.request.get('firstname', None)
+        lastname = self.request.get('lastname', None)
+        email = self.request.get('email', None)
 
         if not (login and password and firstname and lastname and email):
             return Result(False, 101, 'please specify all mandatory fields')

@@ -1,7 +1,7 @@
 from tornado.web import Application as BaseApplication
 from tornado.web import RequestHandler, addslash
 from zope.component import getUtilitiesFor, getUtility
-from haifu.interfaces import (IService, IFormatter, IJson,
+from haifu.interfaces import (IService, IFormatter, IJson, IRequest,
                               IFormatTransformable)
 from zope.interface import implements, directlyProvides, alsoProvides
 from zope import schema
@@ -99,7 +99,7 @@ class Service(grok.GlobalUtility):
 
     def __init__(self, handler):
         self.handler = handler
-        self.request = handler.request
+        self.request = IRequest(handler)
 
     @classmethod
     def __handlers__(cls):

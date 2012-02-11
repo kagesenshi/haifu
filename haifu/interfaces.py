@@ -7,6 +7,13 @@ class IConfiguration(Interface):
 class IService(Interface):
     """ marker interface for a service """
 
+class IRequest(Interface):
+    headers = Attribute('Headers')
+    def get(key, default=None):
+        pass
+    def get_array(key, default=None):
+        pass
+
 class IRegistry(Interface):
     """ Registry utility for site configurations"""
 

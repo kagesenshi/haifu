@@ -44,8 +44,11 @@ def error_handler(func):
 def formattransformer(func):
     def wrapper(self, *args, **kwargs):
         value = func(self, *args, **kwargs)
+        if not value:
+            return
+
         if not IFormatTransformable.providedBy(value):
-            return self.write(unicode(value))
+            self.write(unicode(value))
         format_ = self.get_argument('format', 'xml')
         formatter = getUtility(IFormatter, name=format_)
         self.set_header('Content-Type', formatter.content_type)
