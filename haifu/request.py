@@ -10,8 +10,20 @@ class Request(grok.Adapter):
         self.context = context
 
     @property
+    def method(self):
+        return self.context.request.method
+
+    @property
     def headers(self):
         return self.context.request.headers
+
+    @property
+    def url(self):
+        return self.context.request.full_url()
+
+    @property
+    def path(self):
+        return self.context.request.uri
 
     def get(self, key, default=None):
         return self.context.get_argument(key, default)
