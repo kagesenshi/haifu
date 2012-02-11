@@ -1,6 +1,7 @@
 from haifu.exc import HTTPException, Unauthorized, InternalError
 from zope.component import getUtility, getUtilitiesFor
-from haifu.interfaces import IService, IFormatter, IAuthService
+from haifu.interfaces import (IService, IFormatter, IAuthService,
+                              IFormatTransformable)
 from haifu import util
 import traceback
 import base64
@@ -42,8 +43,10 @@ def error_handler(func):
 
 def formattransformer(func):
     def wrapper(self, *args, **kwargs):
-        format_ = self.get_argument('format', 'xml')
         value = func(self, *args, **kwargs)
+        if not IFormatTransformable.providedBy(value):
+            return self.write(unicode(value))
+        format_ = self.get_argument('format', 'xml')
         formatter = getUtility(IFormatter, name=format_)
         self.set_header('Content-Type', formatter.content_type)
         self.write(formatter.format(value))

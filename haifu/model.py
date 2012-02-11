@@ -1,8 +1,9 @@
 from tornado.web import Application as BaseApplication
 from tornado.web import RequestHandler, addslash
 from zope.component import getUtilitiesFor, getUtility
-from haifu.interfaces import IService, IFormatter, IJson
-from zope.interface import implements, directlyProvides
+from haifu.interfaces import (IService, IFormatter, IJson,
+                              IFormatTransformable)
+from zope.interface import implements, directlyProvides, alsoProvides
 from zope import schema
 import grokcore.component as grok
 import inspect
@@ -183,12 +184,13 @@ def Result(success=True, statuscode=100, message=''):
         status = 'ok'
     else:
         status = 'failed'
-
-    return make_object(haifuschema.IResult, {
+    obj = make_object(haifuschema.IResult, {
         'status': status,
         'statuscode': statuscode,
         'message': message
     })
+    alsoProvides(obj, IFormatTransformable)
+    return obj
 
 def Config(**data):
     return make_object(haifuschema.IConfig, data)
