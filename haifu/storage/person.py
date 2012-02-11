@@ -59,9 +59,12 @@ class SQLPersonAdapter(grok.Adapter):
         return True
 
     def get_properties(self):
-        return {
-            'personid': self.context.login
+        data = {
+            'personid': self.context.login,
+            'firstname': self.context.firstname,
+            'lastname': self.context.lastname
         }
+        return data
 
     def set_properties(self, data):
         pass
