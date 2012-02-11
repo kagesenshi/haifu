@@ -13,6 +13,14 @@ class IRegistry(Interface):
     def get(key, type=None): pass
     def set(key, value): pass
 
+
+class IJson(Interface):
+    def __call__(iface, data, baseclass):
+        """
+            return Object which implements iface,
+            with its attribute set with data
+        """
+
 class IFormatter(Interface):
     """ Output formatter, convert dicts to xml/json """
 

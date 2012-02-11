@@ -50,5 +50,5 @@ class ActivityAdapter(grok.Adapter):
 
     def data(self):
         data = simplejson.loads(self.context.data)
-        data['id'] = self.context.id
+        data['activityid'] = self.context.id
         return data

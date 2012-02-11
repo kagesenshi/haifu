@@ -1,4 +1,5 @@
 from haifu.api import Service, require_auth, node_name, method
+from haifu.model import Activity, Result
 from haifu import util
 from haifu.interfaces import IService, IActivityStorage, IPersonStorage
 from zope.interface import classProvides
@@ -22,9 +23,15 @@ class ActivityService(Service):
                             person_id, limit, offset)
         ]
 
-        result = util.meta()
-        result['data'] = {'activity': list(activities)}
-        return {'ocs': result}
+        result = Result()
+
+        data = []
+        for activity in activities:
+            data.append(Activity(**activity))
+
+        if data:
+            result.data = data
+        return result
 
 
     @node_name('index')
@@ -33,14 +40,14 @@ class ActivityService(Service):
         data = util.extract_data(self.handler, ['message'])
 
         if data['message'] is None:
-            return {'ocs': util.meta(False, 101, 'empty message')}
+            return Result(False, 101, 'empty message')
 
         pstorage = zca.getUtility(IPersonStorage)
         person = pstorage.get_person(person_id)
 
         if person is None:
-            return {'ocs': util.meta(False, 102, 'user not found')}
+            return Result(False, 102, 'user not found')
 
         storage = zca.getUtility(IActivityStorage)
         storage.add_activity(person_id, data)
-        return {'ocs': util.meta()}
+        return Result()

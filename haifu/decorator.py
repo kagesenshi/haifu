@@ -52,23 +52,6 @@ def formattransformer(func):
     wrapper.func_name = func.func_name
     return wrapper
 
-def httpexceptionhandler(func):
-    def wrapper(self, *args, **kwargs):
-        try:
-            result = func(self, *args, **kwargs)
-        except HTTPException, e:
-            self.set_status(e.code)
-            for k, v in e.headers:
-                self.set_header(k, v)
-            message = '%s: %s' % (e.code, e.message)
-            result = util.meta(False, 999, message)
-            self._transforms = []
-            return {'ocs': result}
-        return result
-    _preserve_argcount(wrapper, func)
-    wrapper.func_name = func.func_name
-    return wrapper
-
 def require_auth(func):
     def wrapper(self, *args, **kwargs):
         auth = getUtility(IAuthService)

@@ -18,8 +18,8 @@ class Verification(Service):
         if key:
             vs = zca.getUtility(IVerificationService)
             if vs.approve_verification(key):
-                return {'ocs': util.meta(message='verification successful')}
-        return {'ocs': util.meta(False, 101, 'unknown key')}
+                return Result(message='verification successful')
+        return Result(False, 101, 'unknown key')
 
 
 class EmailVerificationService(grok.GlobalUtility):

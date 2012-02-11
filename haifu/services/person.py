@@ -5,6 +5,7 @@ from zope.interface import classProvides
 import grokcore.component as grok
 import zope.component as zca
 from haifu.api import Service, method, require_auth, node_name
+from haifu.model import Result, Person, Attribute
 from haifu import util
 import base64
 import re
@@ -19,9 +20,8 @@ class PersonService(Service):
         password = self.handler.get_argument('password', None)
 
         if login is None:
-            return {'ocs': util.meta(False, 101, 
+            return Result(False, 101, 
                 'please specify all mandatory fields ')
-            }
 
         auth = zca.getUtility(IAuthService)
         credentials = {
@@ -30,13 +30,13 @@ class PersonService(Service):
         }
 
         if not auth.authenticate(credentials):
-            return {'ocs': util.meta(False, 102, 
-                'login not valid')}
+            return Result(False, 102, 'login not valid')
 
-        result = util.meta()
         principal = auth.principal(credentials)
-        result.update({'data': { 'person': {'personid': principal}}})
-        return {'ocs': result}
+
+        result = Result()
+        result.data = [Person(personid=principal)]
+        return result
 
 
     @method('post')
@@ -48,32 +48,30 @@ class PersonService(Service):
         email = self.handler.get_argument('email', None)
 
         if not (login and password and firstname and lastname and email):
-            return {'ocs': util.meta(False, 101, 
-                        'please specify all mandatory fields')}
+            return Result(False, 101, 'please specify all mandatory fields')
 
         if len(password) < 8:
-            return {'ocs': util.meta(False, 102, 
-                        'please specify a password longer than 8 characters')}
+            return Result(False, 102, 
+                        'please specify a password longer than 8 characters')
 
         if not re.match(r'^[A-Za-z0-9]{0,9999}$', login):
-            return {'ocs': util.meta(False, 102, 
-                        'login can only consist of alphanumeric characters')}
+            return Result(False, 102, 
+                        'login can only consist of alphanumeric characters')
 
         if '@' not in email:
             # not sure whats the best email validator parser around
-            return {'ocs': util.meta(False, 106,
-                'invalid email')}
+            return Result(False, 106, 'invalid email')
 
         storage = zca.getUtility(IPersonStorage)
         vstorage = zca.getUtility(IVerificationStorage)
         if (storage.get_person(login) or 
             vstorage.has_entry('haifu.verify.person', login)):
-            return {'ocs': util.meta(False, 104, 
-                '%s already taken, please choose a different login' % login)}
+            return Result(False, 104, 
+                '%s already taken, please choose a different login' % login)
 
         if storage.get_person_by_email(email):
-            return {'ocs': util.meta(False, 105,
-                '%s already have an account associated' % email)}
+            return Result(False, 105,
+                '%s already have an account associated' % email)
 
         vs = zca.getUtility(IVerificationService)
         vs.send_verification('haifu.verify.person', {
@@ -85,37 +83,35 @@ class PersonService(Service):
             unique_key=login
         )
 
-        return {'ocs': util.meta()}
+        return Result()
 
     @require_auth
     def data(self, person_id):
         storage = zca.getUtility(IPersonStorage)
         person = storage.get_person(person_id)
         if not person:
-            return {'ocs': util.meta(False, 101, 
-                    'unknown user id')}
+            return Result(False, 101, 'unknown user id')
 
         if not person.viewable_by(self.handler.get_current_user()):
-            return {'ocs': util.meta(False, 102,
-                    'user is private')}
+            return Result(False, 102, 'user is private')
 
-        result = util.meta()
-        result['data'] = {
-            'person': person.get_properties()
-        }
+        result = Result()
+        result.data = [
+            Person(**person.get_properties())
+        ]
 
-        return {'ocs': result}
+        return result
 
     @require_auth
     def self(self):
         principal = self.handler.get_current_user()
         storage = zca.getUtility(IPersonStorage)
         person = storage.get_person(principal)
-        result = util.meta()
-        result['data'] = {
-            'person': person.get_properties()
-        }
-        return {'ocs': result}
+        result = Result()
+        result.data = [
+            Person(**person.get_properties())
+        ]
+        return result
 
     @node_name('self')
     @method('post')
@@ -130,9 +126,7 @@ class PersonService(Service):
                 break
 
         if not has_param:
-            return {
-                'ocs': util.meta(False, 101, 'No parameter to update found')
-            }
+            return Result(False, 101, 'No parameter to update found')
 
         principal = self.handler.get_current_user()
         storage = zca.getUtility(IPersonStorage)
@@ -140,7 +134,7 @@ class PersonService(Service):
 
         person.set_properties(data)
 
-        return {'ocs': util.meta()}
+        return result
 
     @require_auth
     def balance(self):
@@ -148,26 +142,27 @@ class PersonService(Service):
         storage = zca.getUtility(IPersonStorage)
         person = storage.get_person(principal)
 
-        result = util.meta()
-        result['data'] = {
-            'person': person.get_balance()
-        }
+        result = Result()
+        result.data = [
+            Person(**person.get_balance())
+        ]
 
-        return {'ocs': result}
+        return result
 
     @require_auth
     def attributes(self, person_id, app=None, key=None):
         storage = zca.getUtility(IPersonStorage)
         person = storage.get_person(person_id)
 
-        result = util.meta()
-        result['data'] = {
-            'attribute': person.get_xattr(app, key)
-        }
+        result = Result()
 
-        return {
-            'ocs': result
-        }
+        data = person.get_xattr(app, key)
+        if data:
+            result.data = [
+                Attribute(person.get_xattr(app, key))
+            ]
+
+        return result
 
 
     @require_auth
@@ -181,9 +176,7 @@ class PersonService(Service):
 
         person.set_xattr(app, key, value)
 
-        return {
-            'ocs': util.meta()
-        }
+        return Result()
 
     @require_auth
     @method('post')
@@ -194,9 +187,7 @@ class PersonService(Service):
 
         person.delete_xattr(app, key, value)
 
-        return {
-            'ocs': util.meta()
-        }
+        return Result()
 
 
 
