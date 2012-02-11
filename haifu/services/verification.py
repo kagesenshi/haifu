@@ -3,6 +3,7 @@ from haifu.interfaces import (IService, IVerificationService,
                                 IVerificationAction,
                                 IVerificationStorage)
 from haifu import util
+from haifu.model import Result
 import grokcore.component as grok
 import zope.component as zca
 from zope.interface import classProvides
