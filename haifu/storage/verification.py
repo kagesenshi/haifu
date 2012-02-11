@@ -61,6 +61,14 @@ class SQLAlchemyVerificationStorage(grok.GlobalUtility):
         for entry in entries:
             session.delete(entry)
 
+    def get_key_for(self, unique_key):
+        session = named_scoped_session('haifu.storage')
+        entry = session.query(VerificationEntry).filter(
+            VerificationEntry.unique_key==unique_key
+        ).first()
+        if entry:
+            return entry.key
+        return None
 
 class VerificationEntryAdapter(grok.Adapter):
     grok.context(VerificationEntry)

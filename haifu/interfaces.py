@@ -56,6 +56,9 @@ class IVerificationService(Interface):
         """ check the verification id, and trigger the associated action. 
             return True for valid id, return False for unknown id """
 
+    def get_key_for(unique_key):
+        """ search for the verification key for unique id"""
+
 class IVerificationAction(Interface):
     """ marker interface for verification actions. """
 
