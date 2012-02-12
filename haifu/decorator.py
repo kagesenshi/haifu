@@ -49,6 +49,8 @@ def formattransformer(func):
 
         if not IFormatTransformable.providedBy(value):
             self.write(unicode(value))
+            return
+
         format_ = self.get_argument('format', 'xml')
         formatter = getUtility(IFormatter, name=format_)
         self.set_header('Content-Type', formatter.content_type)

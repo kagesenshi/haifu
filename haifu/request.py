@@ -30,3 +30,7 @@ class Request(grok.Adapter):
 
     def get_array(self, key, default=None):
         return self.context.get_arguments(key, default)
+
+    @property
+    def query_string(self):
+        return self.context.request.query
