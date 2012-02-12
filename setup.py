@@ -26,7 +26,8 @@ setup(name='haifu',
         'simplejson',
         'xmldict',
         'sqlalchemy',
-        'oauth'
+        'oauth',
+        'python_openid',
       ],
       entry_points={
           'console_scripts': [

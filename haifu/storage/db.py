@@ -101,3 +101,18 @@ class OAuthToken(Model):
     pass
 
 mapper(OAuthToken, oauth_token)
+
+openid_association = Table('openid_association', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('server_url', String(2047)),
+    Column('handle', String(255)),
+    Column('secret', String(1024)),
+    Column('issued', Integer),
+    Column('lifetime', Integer),
+    Column('assoc_type', String(64))
+)
+
+class OpenIDAssociation(Model):
+    pass
+
+mapper(OpenIDAssociation, openid_association)

@@ -1,6 +1,7 @@
 from tornado.web import RequestHandler
 from haifu.interfaces import IRequest
 import grokcore.component as grok
+import urlparse
 
 class Request(grok.Adapter):
     grok.implements(IRequest)
@@ -34,3 +35,13 @@ class Request(grok.Adapter):
     @property
     def query_string(self):
         return self.context.request.query
+
+    @property
+    def body(self):
+        return self.context.request.body
+
+    def get_url(self, path):
+        r = urlparse.ParseResult(self.context.request.protocol,
+                            self.context.request.host,
+                            path,'','','')
+        return urlparse.urlunparse(r)
