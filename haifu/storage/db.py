@@ -59,3 +59,45 @@ class Activity(Model):
     pass
 
 mapper(Activity, activity)
+
+oauth_consumer = Table('oauth_consumer', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('consumer_key', String(255)),
+    Column('consumer_secret', String(255)),
+    Column('consumer_name', String(255)),
+)
+
+class OAuthConsumer(Model):
+    pass
+
+mapper(OAuthConsumer, oauth_consumer)
+
+oauth_nonce = Table('oauth_nonce', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('consumer_key', String(255)),
+    Column('nonce_key', String(255)),
+    Column('token_key', String(255)),
+    Column('timestamp', Integer)
+)
+
+class OAuthNonce(Model):
+    pass
+
+mapper(OAuthNonce, oauth_nonce)
+
+oauth_token = Table('oauth_token', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('token_type', String(15)),
+    Column('consumer_key', String(255)),
+    Column('scope', String(255)),
+    Column('key', String(255)),
+    Column('secret', String(255)),
+    Column('callback', String(1024)),
+    Column('user', String(255)),
+    Column('verifier', String(255))
+)
+
+class OAuthToken(Model):
+    pass
+
+mapper(OAuthToken, oauth_token)

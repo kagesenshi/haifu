@@ -25,7 +25,8 @@ setup(name='haifu',
         'argh',
         'simplejson',
         'xmldict',
-        'sqlalchemy'
+        'sqlalchemy',
+        'oauth'
       ],
       entry_points={
           'console_scripts': [
